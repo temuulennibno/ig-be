@@ -38,8 +38,27 @@ app.use("/users", UserRouter);
 
 app.use(AuthRouter);
 
-mongoose.connect(process.env.MONGO_URL);
+// MongoDB connection with error handling
+mongoose
+  .connect(process.env.MONGO_URL)
+  .then(() => {
+    console.log("Connected to MongoDB successfully");
+  })
+  .catch((error) => {
+    console.error("MongoDB connection error:", error);
+    process.exit(1);
+  });
+
+// Handle MongoDB connection events
+mongoose.connection.on("disconnected", () => {
+  console.warn("MongoDB disconnected");
+});
+
+mongoose.connection.on("error", (error) => {
+  console.error("MongoDB error:", error);
+});
 
 app.listen(PORT, () => {
   console.log(`Your app is running on http://localhost:${PORT}`);
+  console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
 });
